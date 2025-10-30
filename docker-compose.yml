@@ -59,10 +59,3 @@ services:
         max-size: "10m"
         max-file: "3"
 
-    # Network mode for Coolify
-    network_mode: bridge
-
-networks:
-  default:
-    name: whatsapp-connect-network
-    driver: bridge
