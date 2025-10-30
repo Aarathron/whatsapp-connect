@@ -35,7 +35,7 @@ EXPOSE 8765
 
 # Health check (respects dynamic PORT value)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD-SHELL "curl -fsS http://127.0.0.1:${PORT:-8765}/health || exit 1"
+    CMD ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PORT:-8765}/health || exit 1"]
 
 # Run with gunicorn for production, binding to the configured PORT
 CMD ["sh", "-c", "exec gunicorn src.main:app --workers ${GUNICORN_WORKERS:-4} --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8765} --access-logfile - --error-logfile - --log-level ${GUNICORN_LOG_LEVEL:-info}"]
