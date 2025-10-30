@@ -25,7 +25,7 @@ class WhapiMessage(BaseModel):
     chat_id: str  # "919665507774@s.whatsapp.net"
     timestamp: int
     from_: str = Field(alias="from")  # "919665507774"
-    from_name: str
+    from_name: Optional[str] = None
     source: Optional[str] = None
     device_id: Optional[int] = None
     chat_name: Optional[str] = None
@@ -43,7 +43,8 @@ class WhapiEvent(BaseModel):
 
 class WhapiWebhookPayload(BaseModel):
     """Complete webhook payload from Whapi."""
-    messages: List[WhapiMessage]
+    messages: Optional[List[WhapiMessage]] = None
+    statuses: Optional[List[Dict[str, Any]]] = None
     event: WhapiEvent
     channel_id: str
 

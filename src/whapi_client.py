@@ -72,6 +72,7 @@ class WhapiClient:
         url = f"{self.base_url}/messages/interactive"
 
         payload = self._build_button_payload(phone, body, buttons)
+        button_count = len(payload["action"]["buttons"])
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -85,7 +86,7 @@ class WhapiClient:
                 logger.info(
                     "Sent button message to %s with %d buttons",
                     phone,
-                    len(payload["interactive"]["action"]["buttons"])
+                    button_count
                 )
                 return response.json()
         except httpx.HTTPStatusError as e:

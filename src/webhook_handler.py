@@ -26,6 +26,13 @@ class WebhookHandler:
                 logger.debug(f"Skipping non-message event: {item.event.type}/{item.event.event}")
                 continue
 
+            if not item.messages:
+                if item.statuses:
+                    logger.debug("Received message status update: %s", item.statuses)
+                else:
+                    logger.debug("Received empty message payload from Whapi")
+                continue
+
             # Process each message
             for message in item.messages:
                 await self.process_message(message)
@@ -44,7 +51,7 @@ class WebhookHandler:
 
         # Extract phone number and name
         phone = message.from_
-        user_name = message.from_name
+        user_name = message.from_name or message.chat_name or message.from_
 
         # Extract message content
         message_text = None
@@ -52,7 +59,7 @@ class WebhookHandler:
 
         if message.type == "text" and message.text:
             message_text = message.text.body
-        elif message.type == "button" and message.button_response:
+        elif message.type in {"button", "reply"} and message.button_response:
             message_text = message.button_response.text
             is_button_response = True
         else:
