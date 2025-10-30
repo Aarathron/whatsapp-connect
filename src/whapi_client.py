@@ -1,4 +1,5 @@
 """Client for interacting with Whapi.cloud API."""
+import json
 import httpx
 import logging
 from typing import List, Optional
@@ -70,30 +71,22 @@ class WhapiClient:
         """
         url = f"{self.base_url}/messages/interactive"
 
-        # Whapi expects buttons in this format
-        button_objects = [
-            {"type": "reply", "reply": {"id": f"btn_{i}", "title": title}}
-            for i, title in enumerate(buttons[:3])  # Whapi max 3 buttons per message
-        ]
-
-        # Correct Whapi API format: type must be "interactive" with interactive wrapper
-        payload = {
-            "to": phone,
-            "type": "interactive",
-            "interactive": {
-                "type": "button",
-                "body": {"text": body},
-                "action": {
-                    "buttons": button_objects
-                }
-            }
-        }
+        payload = self._build_button_payload(phone, body, buttons)
 
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
+                logger.debug(
+                    "Sending interactive button payload to %s: %s",
+                    phone,
+                    json.dumps(payload)
+                )
                 response = await client.post(url, json=payload, headers=self.headers)
                 response.raise_for_status()
-                logger.info(f"Sent button message to {phone} with {len(buttons)} buttons")
+                logger.info(
+                    "Sent button message to %s with %d buttons",
+                    phone,
+                    len(payload["interactive"]["action"]["buttons"])
+                )
                 return response.json()
         except httpx.HTTPStatusError as e:
             # Log full error response for debugging
@@ -108,6 +101,40 @@ class WhapiClient:
         except Exception as e:
             logger.error(f"Failed to send button message to {phone}: {e}")
             raise
+
+    def _build_button_payload(self, phone: str, body: str, buttons: List[str]) -> dict:
+        """Build the Whapi interactive button payload."""
+
+        button_objects: List[dict] = []
+        for index, title in enumerate(buttons[:3]):  # Whapi max 3 buttons per message
+            trimmed_title = title.strip()
+            if not trimmed_title:
+                continue
+
+            button_objects.append(
+                {
+                    "type": "reply",
+                    "reply": {
+                        "id": f"btn_{index}",
+                        "title": trimmed_title[:20]  # WhatsApp enforces 20-char titles
+                    }
+                }
+            )
+
+        if not button_objects:
+            raise ValueError("Interactive message requires at least one non-empty button label")
+
+        return {
+            "to": phone,
+            "type": "interactive",
+            "interactive": {
+                "type": "button",
+                "body": {"text": body},
+                "action": {
+                    "buttons": button_objects
+                }
+            }
+        }
 
     async def send_link(self, phone: str, body: str, url: str) -> dict:
         """
