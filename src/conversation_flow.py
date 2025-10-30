@@ -14,6 +14,7 @@ from .models import (
 from . import message_templates as templates
 from .whapi_client import whapi_client
 from .backend_client import backend_client
+from .state_store import state_store
 
 logger = logging.getLogger(__name__)
 
@@ -443,27 +444,30 @@ class ConversationFlowHandler:
 
     async def get_or_create_state(self, phone: str, user_name: str) -> ConversationStateData:
         """Get existing state or create new one."""
-        # TODO: Implement database lookup
-        # For now, create new state (this will be replaced with DB logic)
-        return ConversationStateData(
+        existing = await state_store.get(phone)
+        if existing:
+            return existing
+
+        state = ConversationStateData(
             current_step=ConversationState.NEW,
             last_message_at=datetime.utcnow()
         )
+        await state_store.set(phone, state)
+        return state
 
     async def get_state(self, phone: str) -> Optional[ConversationStateData]:
         """Get existing state."""
-        # TODO: Implement database lookup
-        return None
+        return await state_store.get(phone)
 
     async def save_state(self, phone: str, state_data: ConversationStateData):
         """Save conversation state."""
-        # TODO: Implement database save
         state_data.last_message_at = datetime.utcnow()
+        await state_store.set(phone, state_data)
         logger.info(f"Saved state for {phone}: {state_data.current_step}")
 
     async def clear_state(self, phone: str):
         """Clear conversation state."""
-        # TODO: Implement database clear
+        await state_store.delete(phone)
         logger.info(f"Cleared state for {phone}")
 
     # ========== Utility Methods ==========
