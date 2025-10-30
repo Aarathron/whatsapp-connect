@@ -12,7 +12,7 @@ class WhapiClient:
     """Client for sending messages via Whapi.cloud API."""
 
     def __init__(self):
-        self.base_url = settings.whapi_api_url
+        self.base_url = settings.whapi_api_url.rstrip('/')
         self.token = settings.whapi_api_token
         self.headers = {
             "Authorization": f"Bearer {self.token}",
