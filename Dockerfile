@@ -50,8 +50,8 @@ EXPOSE 8001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()" || exit 1
 
-# Run with gunicorn for production
-CMD ["gunicorn", "src.main:app", \
+# Run with gunicorn for production (using python -m to avoid PATH issues)
+CMD ["python", "-m", "gunicorn", "src.main:app", \
      "--workers", "4", \
      "--worker-class", "uvicorn.workers.UvicornWorker", \
      "--bind", "0.0.0.0:8001", \
