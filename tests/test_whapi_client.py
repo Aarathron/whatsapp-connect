@@ -25,22 +25,19 @@ class WhapiButtonPayloadTest(unittest.TestCase):
             buttons=["Yes", "No"]
         )
 
-        self.assertEqual(payload["type"], "interactive")
+        self.assertEqual(payload["type"], "button")
+        self.assertEqual(payload["body"]["text"], "Choose an option")
 
-        interactive = payload["interactive"]
-        self.assertEqual(interactive["type"], "button")
-
-        action = interactive["action"]
+        action = payload["action"]
         self.assertIn("buttons", action)
 
         buttons = action["buttons"]
         self.assertEqual(len(buttons), 2)
 
         first_button = buttons[0]
-        self.assertEqual(first_button["type"], "reply")
-        self.assertIn("reply", first_button)
-        self.assertEqual(first_button["reply"]["id"], "btn_0")
-        self.assertEqual(first_button["reply"]["title"], "Yes")
+        self.assertEqual(first_button["type"], "quick_reply")
+        self.assertEqual(first_button["id"], "btn_0")
+        self.assertEqual(first_button["title"], "Yes")
 
 
 if __name__ == "__main__":

@@ -113,11 +113,9 @@ class WhapiClient:
 
             button_objects.append(
                 {
-                    "type": "reply",
-                    "reply": {
-                        "id": f"btn_{index}",
-                        "title": trimmed_title[:20]  # WhatsApp enforces 20-char titles
-                    }
+                    "type": "quick_reply",
+                    "title": trimmed_title[:20],  # WhatsApp enforces 20-char titles
+                    "id": f"btn_{index}"
                 }
             )
 
@@ -126,13 +124,10 @@ class WhapiClient:
 
         return {
             "to": phone,
-            "type": "interactive",
-            "interactive": {
-                "type": "button",
-                "body": {"text": body},
-                "action": {
-                    "buttons": button_objects
-                }
+            "type": "button",
+            "body": {"text": body},
+            "action": {
+                "buttons": button_objects
             }
         }
 
@@ -166,17 +161,13 @@ class WhapiClient:
         """
         url = f"{self.base_url}/messages/interactive"
 
-        # Correct Whapi API format: type must be "interactive" with interactive wrapper
         payload = {
             "to": phone,
-            "type": "interactive",
-            "interactive": {
-                "type": "list",
-                "body": {"text": body},
-                "action": {
-                    "button": button_text,
-                    "sections": sections
-                }
+            "type": "list",
+            "body": {"text": body},
+            "action": {
+                "button": button_text,
+                "sections": sections
             }
         }
 
