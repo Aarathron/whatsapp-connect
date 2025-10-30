@@ -86,26 +86,34 @@ whatsapp-connect/
 
 ```bash
 # From whatsapp-connect directory
-python -m uvicorn src.main:app --reload --port 8001
+python -m uvicorn src.main:app --reload --port 8765
 ```
 
-The service will start on `http://localhost:8001`
+The service will start on `http://localhost:8765`
 
 #### Production Mode
 
 ```bash
 # Using uvicorn directly
-uvicorn src.main:app --host 0.0.0.0 --port 8001 --workers 4
+uvicorn src.main:app --host 0.0.0.0 --port 8765 --workers 4
 
 # Or with gunicorn
-gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8001
+gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8765
+```
+
+### Deploying on Coolify
+
+- Select the `Dockerfile` build type and ensure the `Port Exposes` field includes `8765`.
+- Coolify injects a `PORT` environment variable at runtime matching the first exposed port, so the container must bind to `$PORT` ([Coolify docs](https://raw.githubusercontent.com/coollabsio/coolify-docs/v4.x/docs/knowledge-base/environment-variables.md)).
+- Provide required secrets (Whapi token, backend URLs, etc.) via Coolify's Environment tab; optional runtime tuning such as `GUNICORN_WORKERS` and `GUNICORN_LOG_LEVEL` can be added there too.
+- After deployment, set the Whapi webhook URL to `https://<your-domain>/webhook` so inbound messages reach the FastAPI service.
 ```
 
 ### Setting Up Whapi Webhook
 
 1. **Expose your local server** (for development):
    ```bash
-   ngrok http 8001
+   ngrok http 8765
    ```
 
    Copy the ngrok URL (e.g., `https://abc123.ngrok.io`)
@@ -366,7 +374,7 @@ Database integration is pending. State is currently in-memory and will be lost o
    User=root
    WorkingDirectory=/root/developmental area mapping/whatsapp-connect
    Environment="PATH=/root/developmental area mapping/whatsapp-connect/venv/bin"
-   ExecStart=/root/developmental area mapping/whatsapp-connect/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8001
+   ExecStart=/root/developmental area mapping/whatsapp-connect/venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8765
    Restart=always
 
    [Install]
@@ -388,7 +396,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY src/ ./src/
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8765"]
 ```
 
 ## Roadmap

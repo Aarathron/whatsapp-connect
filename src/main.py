@@ -86,6 +86,10 @@ async def webhook(
 
         # Validate payload structure
         try:
+            if isinstance(payload_data, dict):
+                payload_data = [payload_data]
+            elif not isinstance(payload_data, list):
+                raise ValueError(f"Unsupported payload type: {type(payload_data)}")
             payload = [WhapiWebhookPayload(**item) for item in payload_data]
         except Exception as e:
             logger.error(f"Invalid webhook payload structure: {e}")

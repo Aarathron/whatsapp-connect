@@ -10,7 +10,7 @@ services:
 
     # Port mapping
     ports:
-      - "8001:8001"
+      - "${PORT:-8765}:${PORT:-8765}"
 
     # Environment variables (loaded from .env file)
     environment:
@@ -31,7 +31,7 @@ services:
 
       # Application Configuration
       - HOST=${HOST:-0.0.0.0}
-      - PORT=${PORT:-8001}
+      - PORT=${PORT:-8765}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - SESSION_TIMEOUT_HOURS=${SESSION_TIMEOUT_HOURS:-24}
       - REMINDER_DELAY_HOURS=${REMINDER_DELAY_HOURS:-2}
@@ -46,7 +46,7 @@ services:
 
     # Health check
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()"]
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:${PORT:-8765}/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

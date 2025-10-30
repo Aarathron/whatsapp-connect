@@ -229,12 +229,12 @@ sudo systemctl start whatsapp-connect
 ### Option 2: Docker Container
 ```bash
 docker build -t whatsapp-connect .
-docker run -p 8001:8001 --env-file .env whatsapp-connect
+docker run -p 8765:8765 --env-file .env whatsapp-connect
 ```
 
 ### Option 3: PM2 (Node.js process manager)
 ```bash
-pm2 start "uvicorn src.main:app --host 0.0.0.0 --port 8001" --name whatsapp-connect
+pm2 start "uvicorn src.main:app --host 0.0.0.0 --port 8765" --name whatsapp-connect
 ```
 
 ## 🔜 What's Next? (Not Yet Implemented)
@@ -359,7 +359,7 @@ pm2 start "uvicorn src.main:app --host 0.0.0.0 --port 8001" --name whatsapp-conn
 tail -f /var/log/whatsapp-connect.log
 
 # Test webhook manually
-curl -X POST http://localhost:8001/webhook -H "Content-Type: application/json" -d @test_payload.json
+curl -X POST http://localhost:8765/webhook -H "Content-Type: application/json" -d @test_payload.json
 ```
 
 ### Adding New Features
@@ -407,7 +407,7 @@ Key metrics to watch:
 **To get it running:**
 1. Install dependencies: `pip install -r requirements.txt`
 2. Configure `.env` with your Whapi credentials
-3. Start service: `python -m uvicorn src.main:app --reload --port 8001`
+3. Start service: `python -m uvicorn src.main:app --reload --port 8765`
 4. Configure Whapi webhook to your URL
 5. Send "Start" to your WhatsApp number
 

@@ -67,7 +67,7 @@ docker ps
 docker logs whatsapp-connect
 
 # Test health endpoint
-curl http://localhost:8001/health
+curl http://localhost:8765/health
 ```
 
 ---
@@ -111,9 +111,10 @@ curl http://localhost:8001/health
    - Dockerfile Location: `./Dockerfile`
 
 3. **Port Configuration**
-   - Application Port: `8001`
-   - Exposed Port: `8001` (or your preferred external port)
+   - Port Exposes: `8765`
+   - Leave host mapping blank unless you need a fixed host port
    - Protocol: `HTTP`
+   - Coolify auto-injects the `PORT` runtime variable with the first exposed port, so the container process should listen on `$PORT` instead of a hard-coded value ([Coolify docs](https://raw.githubusercontent.com/coollabsio/coolify-docs/v4.x/docs/knowledge-base/environment-variables.md))
 
 4. **Domain Configuration** (optional)
    - Add your custom domain (e.g., `whatsapp.yourdomain.com`)
@@ -142,7 +143,8 @@ REDIS_URL=redis://your-redis-host:6379/0
 
 # Application Settings
 HOST=0.0.0.0
-PORT=8001
+# Allow Coolify defaults (PORT is set automatically from the exposed port)
+PORT=8765
 LOG_LEVEL=INFO
 SESSION_TIMEOUT_HOURS=24
 REMINDER_DELAY_HOURS=2
@@ -212,7 +214,7 @@ MAX_RESUME_HOURS=48
 | `REMINDER_DELAY_HOURS` | `2` | Delay before sending reminders |
 | `MAX_RESUME_HOURS` | `48` | Maximum time to resume session |
 | `HOST` | `0.0.0.0` | Server host binding |
-| `PORT` | `8001` | Server port |
+| `PORT` | `8765` | Server port |
 | `LOG_LEVEL` | `INFO` | Logging level |
 
 ---
@@ -237,7 +239,7 @@ docker logs whatsapp-connect
 docker exec whatsapp-connect env | grep WHAPI
 
 # Check port availability
-sudo lsof -i :8001
+sudo lsof -i :8765
 
 # Test database connection
 docker exec whatsapp-connect python -c "from src.config import settings; print(settings.DATABASE_URL)"
@@ -248,7 +250,7 @@ docker exec whatsapp-connect python -c "from src.config import settings; print(s
 **Check:**
 1. Webhook URL is correctly configured in Whapi.cloud
 2. Application is publicly accessible
-3. Firewall allows incoming connections on port 8001
+3. Firewall allows incoming connections on port 8765
 4. SSL certificate is valid (if using HTTPS)
 
 **Test webhook manually:**
@@ -280,10 +282,10 @@ docker exec whatsapp-connect env | grep BACKEND_API_URL
 **Diagnose:**
 ```bash
 # Check health endpoint
-curl http://localhost:8001/health
+curl http://localhost:8765/health
 
 # Check detailed health
-curl http://localhost:8001/health -v
+curl http://localhost:8765/health -v
 
 # Check application logs
 docker logs -f whatsapp-connect

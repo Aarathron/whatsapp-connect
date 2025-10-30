@@ -45,7 +45,7 @@ MAX_RESUME_HOURS=48
 
 # Server Configuration
 HOST=0.0.0.0
-PORT=8001
+PORT=8765
 LOG_LEVEL=INFO
 EOF
 ```
@@ -62,7 +62,7 @@ EOF
 source venv/bin/activate
 
 # Start the service
-python -m uvicorn src.main:app --reload --port 8001
+python -m uvicorn src.main:app --reload --port 8765
 ```
 
 You should see:
@@ -73,7 +73,7 @@ INFO:     Starting BrainyTots WhatsApp Connect service...
 INFO:     Backend API URL: http://localhost:8000
 INFO:     Backend API is healthy ✓
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8001
+INFO:     Uvicorn running on http://0.0.0.0:8765
 ```
 
 ## Step 4: Expose Your Service (For Testing)
@@ -82,14 +82,14 @@ INFO:     Uvicorn running on http://0.0.0.0:8001
 
 ```bash
 # In a new terminal
-ngrok http 8001
+ngrok http 8765
 ```
 
 Copy the HTTPS URL (e.g., `https://abc123.ngrok.io`)
 
 ### Option B: Direct deployment (Production)
 
-If you're on your server (94.136.188.253), configure your web server (nginx/apache) to proxy to port 8001.
+If you're on your server (94.136.188.253), configure your web server (nginx/apache) to proxy to port 8765.
 
 ## Step 5: Configure Whapi Webhook
 
@@ -133,8 +133,8 @@ Please select your preferred language:
 
 ### Service won't start
 ```bash
-# Check if port 8001 is available
-lsof -i :8001
+# Check if port 8765 is available
+lsof -i :8765
 
 # Check backend is running
 curl http://localhost:8000/healthz
@@ -148,7 +148,7 @@ curl http://localhost:8000/healthz
 # Verify webhook is configured correctly in Whapi dashboard
 
 # Test webhook manually
-curl -X POST http://localhost:8001/webhook \
+curl -X POST http://localhost:8765/webhook \
   -H "Content-Type: application/json" \
   -d '[{"messages":[{"id":"test","from_me":false,"type":"text","chat_id":"test@s.whatsapp.net","timestamp":1234567890,"from":"1234567890","from_name":"Test User","text":{"body":"hello"}}],"event":{"type":"messages","event":"post"},"channel_id":"test"}]'
 ```
@@ -176,7 +176,7 @@ Once your bot is working:
 To get the link/QR code for users:
 
 ```bash
-curl http://localhost:8001/qr-code
+curl http://localhost:8765/qr-code
 ```
 
 Response:
@@ -193,13 +193,13 @@ Use this link on your website or generate a QR code from it.
 
 ```bash
 # Start service
-python -m uvicorn src.main:app --reload --port 8001
+python -m uvicorn src.main:app --reload --port 8765
 
 # Start with more workers (production)
-gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8001
+gunicorn src.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8765
 
 # Check health
-curl http://localhost:8001/health
+curl http://localhost:8765/health
 
 # View logs (if using systemd)
 journalctl -u whatsapp-connect -f

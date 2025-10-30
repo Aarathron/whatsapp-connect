@@ -36,13 +36,13 @@ Use this checklist to deploy the WhatsApp Connect service to production.
 ## Local Testing
 
 ### 5. Service Startup
-- [ ] Service starts without errors: `python -m uvicorn src.main:app --reload --port 8001`
-- [ ] Health endpoint works: `curl http://localhost:8001/health`
+- [ ] Service starts without errors: `python -m uvicorn src.main:app --reload --port 8765`
+- [ ] Health endpoint works: `curl http://localhost:8765/health`
 - [ ] Backend connectivity confirmed in startup logs
 - [ ] No critical errors in logs
 
 ### 6. Webhook Testing (Local)
-- [ ] ngrok installed: `ngrok http 8001`
+- [ ] ngrok installed: `ngrok http 8765`
 - [ ] ngrok URL obtained (e.g., https://abc123.ngrok.io)
 - [ ] Whapi webhook configured to ngrok URL
 - [ ] Test message sent to WhatsApp number
@@ -80,7 +80,7 @@ Use this checklist to deploy the WhatsApp Connect service to production.
 
 ### 10. Service Configuration
 - [ ] `.env` file created on server with production values
-- [ ] Firewall allows port 8001 (or configured port)
+- [ ] Firewall allows port 8765 (or configured port)
 - [ ] SSL/TLS certificate configured (if using HTTPS directly)
 - [ ] Reverse proxy configured (nginx/apache) if needed
 
@@ -97,7 +97,7 @@ Choose one:
 #### Option B: Docker
 - [ ] Dockerfile created
 - [ ] Image built: `docker build -t whatsapp-connect .`
-- [ ] Container started: `docker run -d -p 8001:8001 --env-file .env whatsapp-connect`
+- [ ] Container started: `docker run -d -p 8765:8765 --env-file .env whatsapp-connect`
 - [ ] Container running: `docker ps`
 
 #### Option C: PM2
@@ -196,7 +196,7 @@ Choose one:
 ### Start Service
 ```bash
 # Development
-python -m uvicorn src.main:app --reload --port 8001
+python -m uvicorn src.main:app --reload --port 8765
 
 # Production (systemd)
 sudo systemctl start whatsapp-connect
@@ -211,7 +211,7 @@ pm2 start whatsapp-connect
 ### Check Status
 ```bash
 # Health check
-curl http://localhost:8001/health
+curl http://localhost:8765/health
 
 # Systemd status
 sudo systemctl status whatsapp-connect

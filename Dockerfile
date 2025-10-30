@@ -25,18 +25,17 @@ COPY src/ ./src/
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
-EXPOSE 8001
+# Runtime defaults (can be overridden by Coolify / env vars)
+ENV PORT=8765 \
+    GUNICORN_WORKERS=4 \
+    GUNICORN_LOG_LEVEL=info
 
-# Health check
+# Expose default port for documentation purposes
+EXPOSE 8765
+
+# Health check (respects dynamic PORT value)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()" || exit 1
+    CMD-SHELL "curl -fsS http://127.0.0.1:${PORT:-8765}/health || exit 1"
 
-# Run with gunicorn for production (using python -m to avoid PATH issues)
-CMD ["python", "-m", "gunicorn", "src.main:app", \
-     "--workers", "4", \
-     "--worker-class", "uvicorn.workers.UvicornWorker", \
-     "--bind", "0.0.0.0:8001", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-", \
-     "--log-level", "info"]
+# Run with gunicorn for production, binding to the configured PORT
+CMD ["sh", "-c", "exec gunicorn src.main:app --workers ${GUNICORN_WORKERS:-4} --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8765} --access-logfile - --error-logfile - --log-level ${GUNICORN_LOG_LEVEL:-info}"]
