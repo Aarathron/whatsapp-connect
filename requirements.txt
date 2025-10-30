@@ -11,3 +11,4 @@ celery==5.4.0
 redis==5.0.8
 python-dateutil==2.9.0
 phonenumbers==8.13.45
+gunicorn==21.2.0
