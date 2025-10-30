@@ -1,6 +1,5 @@
-# Multi-stage build for WhatsApp Connect Service
-# Stage 1: Builder - Install dependencies
-FROM python:3.12-slim as builder
+# Single-stage build for WhatsApp Connect Service
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
@@ -10,33 +9,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     postgresql-client \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
 COPY requirements.txt .
 
-# Install Python dependencies to /usr/local (default location)
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Stage 2: Runtime - Create lightweight production image
-FROM python:3.12-slim
-
-# Set working directory
-WORKDIR /app
-
-# Install only runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
-
-# Copy Python dependencies from builder (copy entire /usr/local to get all packages and binaries)
-COPY --from=builder /usr/local /usr/local
 
 # Copy application code
 COPY src/ ./src/
-COPY requirements.txt .
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
