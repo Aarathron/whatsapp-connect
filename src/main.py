@@ -22,6 +22,7 @@ from .models import WhapiWebhookPayload
 from .webhook_handler import WebhookHandler
 from .conversation_flow import ConversationFlowHandler
 from .backend_client import backend_client
+from .state_store import state_store
 
 # Create FastAPI app
 app = FastAPI(
@@ -37,6 +38,14 @@ async def startup_event():
     logger.info("Starting BrainyTots WhatsApp Connect service...")
     logger.info(f"Backend API URL: {settings.backend_api_url}")
     logger.info(f"Whapi Channel ID: {settings.whapi_channel_id}")
+
+    # Ensure shared conversation state persistence is ready
+    await state_store.initialize()
+    if state_store.uses_memory_only:
+        logger.warning(
+            "Conversation state store is using in-memory fallback. "
+            "Multiple workers will cause state loss."
+        )
 
     # Check backend health
     is_healthy = await backend_client.health_check()

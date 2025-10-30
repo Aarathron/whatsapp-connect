@@ -47,7 +47,8 @@ whatsapp-connect/
 - Python 3.10+
 - Whapi.cloud account with API token
 - BrainyTots backend API running
-- PostgreSQL database (for state persistence)
+- Redis 6+ instance (required for conversation state)
+- PostgreSQL database (reserved for future persistence needs)
 
 ### Installation
 
@@ -79,6 +80,10 @@ whatsapp-connect/
    - `WHATSAPP_NUMBER`: Your WhatsApp Business number
    - `BACKEND_API_URL`: URL of the BrainyTots backend (e.g., http://localhost:8000)
    - `DATABASE_URL`: PostgreSQL connection string
+   - `REDIS_URL`: Redis connection string (e.g., redis://localhost:6379/0)
+
+   Optional safety valves:
+   - `ALLOW_MEMORY_STATE_STORE`: Set to `1` only for local testing without Redis. **Never enable in multi-worker deployments.**
 
 ### Running the Service
 
@@ -257,7 +262,7 @@ Conversation state is tracked per user (phone number) and includes:
 - Question count
 - Last activity timestamp
 
-**Note**: Database integration is pending. Current implementation uses in-memory state (will be lost on restart).
+**Implementation**: Conversation state is persisted in Redis. The service performs a Redis health check on startup and aborts if a shared store is unavailable (unless `ALLOW_MEMORY_STATE_STORE` is explicitly enabled for local-only testing). Running multiple workers without Redis will now fail fast.
 
 ## Development
 
@@ -353,11 +358,11 @@ curl http://localhost:8000/healthz
 echo $BACKEND_API_URL
 ```
 
-### State Not Persisting
+### State Not Persisting / Flow Restarting
 
-Database integration is pending. State is currently in-memory and will be lost on restart.
-
-**Solution**: Implement database models and persistence layer (see TODO comments in code).
+1. Confirm the service connected to Redis during startup (look for `Connected to Redis for conversation state` log line).
+2. Verify `REDIS_URL` is reachable from the container/host (`redis-cli -u $REDIS_URL ping`).
+3. Ensure `ALLOW_MEMORY_STATE_STORE` is **not** set in production; the memory fallback is only for single-worker local testing.
 
 ## Deployment
 

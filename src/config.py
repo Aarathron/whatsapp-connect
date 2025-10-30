@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     reminder_delay_hours: int = 2
     max_resume_hours: int = 48
 
+    # Feature Flags / Safety Nets
+    allow_memory_state_store: bool = False
+
     # Server Configuration
     host: str = "0.0.0.0"
     port: int = 8765

@@ -239,8 +239,8 @@ pm2 start "uvicorn src.main:app --host 0.0.0.0 --port 8765" --name whatsapp-conn
 
 ## 🔜 What's Next? (Not Yet Implemented)
 
-### 1. Database Persistence ⚠️ CRITICAL
-**Current State**: State is in-memory (lost on restart)
+### 1. Durable Persistence ⚠️ NEXT
+**Current State**: Conversation state lives in Redis (survives restarts but not long-term analytics)
 
 **What's Needed**:
 - Create database models (WhatsAppUser, UserSession tables)
@@ -303,12 +303,11 @@ pm2 start "uvicorn src.main:app --host 0.0.0.0 --port 8765" --name whatsapp-conn
 
 ## 🐛 Known Limitations
 
-1. **No State Persistence**: State lost on restart (fixable with database)
-2. **No Resume**: Can't resume incomplete assessments (needs database)
+1. **Redis-Only Persistence**: State stored ephemerally in Redis; no long-term history in PostgreSQL
+2. **No Resume**: Can't resume incomplete assessments (needs durable storage)
 3. **No Reminders**: No automated follow-ups (needs Celery)
-4. **Single Worker**: Not horizontally scalable yet (needs session affinity or Redis)
-5. **No Rate Limiting**: No protection against spam (could add middleware)
-6. **No User Authentication**: Anyone can start assessment (acceptable for now)
+4. **Rate Limiting**: No protection against spam (could add middleware)
+5. **No User Authentication**: Anyone can start assessment (acceptable for now)
 
 ## 🧪 Testing Status
 
@@ -411,7 +410,7 @@ Key metrics to watch:
 4. Configure Whapi webhook to your URL
 5. Send "Start" to your WhatsApp number
 
-**The bot is production-ready for basic use, but needs database integration for state persistence and resume functionality.**
+**The bot is production-ready for basic use with Redis-backed state, but still needs durable database integration for history/resume features.**
 
 ---
 

@@ -446,12 +446,19 @@ class ConversationFlowHandler:
         """Get existing state or create new one."""
         existing = await state_store.get(phone)
         if existing:
+            logger.debug(
+                "Loaded existing state for %s at step %s (questions=%s)",
+                phone,
+                existing.current_step,
+                existing.questions_asked
+            )
             return existing
 
         state = ConversationStateData(
             current_step=ConversationState.NEW,
             last_message_at=datetime.utcnow()
         )
+        logger.info("Initialized new conversation state for %s (user=%s)", phone, user_name)
         await state_store.set(phone, state)
         return state
 
