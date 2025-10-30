@@ -59,9 +59,19 @@ class WebhookHandler:
 
         if message.type == "text" and message.text:
             message_text = message.text.body
-        elif message.type in {"button", "reply"} and message.button_response:
-            message_text = message.button_response.text
-            is_button_response = True
+        elif message.type in {"button", "reply"}:
+            if message.button_response:
+                message_text = message.button_response.text
+                is_button_response = True
+            elif message.reply and message.reply.buttons_reply:
+                message_text = message.reply.buttons_reply.title
+                is_button_response = True
+            else:
+                logger.warning(
+                    "Button/reply message missing button payload: %s",
+                    message.id
+                )
+                return
         else:
             logger.warning(f"Unsupported message type: {message.type}")
             return

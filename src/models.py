@@ -13,8 +13,20 @@ class WhapiTextMessage(BaseModel):
 
 
 class WhapiButtonResponse(BaseModel):
-    """Button response from Whapi message."""
+    """Legacy button response payload (older interactive format)."""
     text: str
+
+
+class WhapiButtonsReply(BaseModel):
+    """Buttons reply payload for quick reply responses."""
+    id: str
+    title: str
+
+
+class WhapiReplyPayload(BaseModel):
+    """Reply envelope sent for quick reply buttons."""
+    type: str
+    buttons_reply: Optional[WhapiButtonsReply] = None
 
 
 class WhapiMessage(BaseModel):
@@ -33,6 +45,7 @@ class WhapiMessage(BaseModel):
     # Message content fields (only one will be present based on type)
     text: Optional[WhapiTextMessage] = None
     button_response: Optional[WhapiButtonResponse] = None
+    reply: Optional[WhapiReplyPayload] = None
 
 
 class WhapiEvent(BaseModel):
