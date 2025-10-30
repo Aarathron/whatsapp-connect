@@ -42,6 +42,16 @@ class WhapiClient:
                 response.raise_for_status()
                 logger.info(f"Sent text message to {phone}")
                 return response.json()
+        except httpx.HTTPStatusError as e:
+            # Log full error response for debugging
+            error_detail = ""
+            if e.response is not None:
+                try:
+                    error_detail = f"Response: {e.response.text}"
+                except Exception:
+                    error_detail = f"Status: {e.response.status_code}"
+            logger.error(f"Failed to send text message to {phone}: {e}. {error_detail}")
+            raise
         except Exception as e:
             logger.error(f"Failed to send text message to {phone}: {e}")
             raise
@@ -66,12 +76,16 @@ class WhapiClient:
             for i, title in enumerate(buttons[:3])  # Whapi max 3 buttons per message
         ]
 
+        # Correct Whapi API format: type must be "interactive" with interactive wrapper
         payload = {
             "to": phone,
-            "type": "button",
-            "body": {"text": body},
-            "action": {
-                "buttons": button_objects
+            "type": "interactive",
+            "interactive": {
+                "type": "button",
+                "body": {"text": body},
+                "action": {
+                    "buttons": button_objects
+                }
             }
         }
 
@@ -81,6 +95,16 @@ class WhapiClient:
                 response.raise_for_status()
                 logger.info(f"Sent button message to {phone} with {len(buttons)} buttons")
                 return response.json()
+        except httpx.HTTPStatusError as e:
+            # Log full error response for debugging
+            error_detail = ""
+            if e.response is not None:
+                try:
+                    error_detail = f"Response: {e.response.text}"
+                except Exception:
+                    error_detail = f"Status: {e.response.status_code}"
+            logger.error(f"Failed to send button message to {phone}: {e}. {error_detail}")
+            raise
         except Exception as e:
             logger.error(f"Failed to send button message to {phone}: {e}")
             raise
@@ -115,13 +139,17 @@ class WhapiClient:
         """
         url = f"{self.base_url}/messages/interactive"
 
+        # Correct Whapi API format: type must be "interactive" with interactive wrapper
         payload = {
             "to": phone,
-            "type": "list",
-            "body": {"text": body},
-            "action": {
-                "button": button_text,
-                "sections": sections
+            "type": "interactive",
+            "interactive": {
+                "type": "list",
+                "body": {"text": body},
+                "action": {
+                    "button": button_text,
+                    "sections": sections
+                }
             }
         }
 
@@ -131,6 +159,16 @@ class WhapiClient:
                 response.raise_for_status()
                 logger.info(f"Sent list message to {phone}")
                 return response.json()
+        except httpx.HTTPStatusError as e:
+            # Log full error response for debugging
+            error_detail = ""
+            if e.response is not None:
+                try:
+                    error_detail = f"Response: {e.response.text}"
+                except Exception:
+                    error_detail = f"Status: {e.response.status_code}"
+            logger.error(f"Failed to send list message to {phone}: {e}. {error_detail}")
+            raise
         except Exception as e:
             logger.error(f"Failed to send list message to {phone}: {e}")
             raise
