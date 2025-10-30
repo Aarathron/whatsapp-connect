@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  whatsapp-connect:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: whatsapp-connect
+    image: whatsapp-connect:latest
+
+    # Port mapping
+    ports:
+      - "8001:8001"
+
+    # Environment variables (loaded from .env file)
+    environment:
+      # Whapi.cloud Configuration
+      - WHAPI_API_TOKEN=${WHAPI_API_TOKEN}
+      - WHAPI_API_URL=${WHAPI_API_URL:-https://gate.whapi.cloud}
+      - WHAPI_CHANNEL_ID=${WHAPI_CHANNEL_ID}
+      - WHATSAPP_NUMBER=${WHATSAPP_NUMBER}
+
+      # Backend API Configuration
+      - BACKEND_API_URL=${BACKEND_API_URL}
+
+      # Database Configuration (External PostgreSQL)
+      - DATABASE_URL=${DATABASE_URL}
+
+      # Redis Configuration (External Redis)
+      - REDIS_URL=${REDIS_URL:-redis://localhost:6379/0}
+
+      # Application Configuration
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8001}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SESSION_TIMEOUT_HOURS=${SESSION_TIMEOUT_HOURS:-24}
+      - REMINDER_DELAY_HOURS=${REMINDER_DELAY_HOURS:-2}
+      - MAX_RESUME_HOURS=${MAX_RESUME_HOURS:-48}
+
+    # Load environment variables from .env file
+    env_file:
+      - .env
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Network mode for Coolify
+    network_mode: bridge
+
+networks:
+  default:
+    name: whatsapp-connect-network
+    driver: bridge
